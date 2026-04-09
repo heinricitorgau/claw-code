@@ -1,14 +1,23 @@
-# 對齊狀態 — claw-code Rust Port
+# Experimental Checkpoint — claw-code Rust Port
 
 最後更新：2026-04-03
 
-## 摘要
+## 這份文件的角色
 
-- Canonical 文件：這份最上層的 `PARITY.md` 是 `rust/scripts/run_mock_parity_diff.py` 所消費的檔案。
-- 要求的 9-lane checkpoint：**9 條 lanes 全部已合併到 `main`。**
+- 這份最上層的 `PARITY.md` 是 `rust/scripts/run_mock_parity_diff.py` 所消費的 canonical 文件。
+- 它的用途不是做產品宣傳，而是記錄一個**可檢查的實驗 checkpoint**。
+- 目前要求的 9-lane checkpoint：**9 條 lanes 全部已合併到 `main`。**
 - 目前 `main` HEAD：`ee31e00`（stub implementations 已被真實的 AskUserQuestion + RemoteTrigger 取代）。
 - 這個 checkpoint 下的 repository 統計：`main` 上 **292 commits** / 所有 branches 合計 **293 commits**、**9 個 crates**、**48,599 行受追蹤 Rust LOC**、**2,568 行測試 LOC**、**3 位作者**，日期範圍 **2026-03-31 → 2026-04-03**。
 - Mock parity harness 統計：**10 個 scripted scenarios**、在 `rust/crates/rusty-claude-cli/tests/mock_parity_harness.rs` 中捕捉到 **19 個 `/v1/messages` requests**。
+
+## 這個 checkpoint 想回答什麼
+
+這份報告主要用來回答三件事：
+
+- Rust port 目前到底對齊到了哪個程度
+- 哪些能力已經有可驗證證據，哪些只是表面接線
+- 哪些地方仍然需要保持誠實，不應過度宣稱 parity
 
 ## Mock parity harness — 里程碑 1
 
@@ -35,7 +44,7 @@ Canonical scenario map：`rust/mock_parity_scenarios.json`
 - File tools — harness 驗證過的 flows
 - 由 mock parity harness 驗證的 streaming response support
 
-## 9-lane checkpoint
+## 9-lane checkpoint（實驗里程碑）
 
 | Lane | 狀態 | Feature commit | Merge commit | 證據 |
 |---|---|---|---|---|
@@ -49,7 +58,7 @@ Canonical scenario map：`rust/mock_parity_scenarios.json`
 | 8. LSP client | merged | `2d66503` | `d7f0dc6` | `rust/crates/runtime/src/lsp_client.rs`, `rust/crates/tools/src/lib.rs`（`+461/-9`） |
 | 9. Permission enforcement | merged | `66283f4` | `336f820` | `rust/crates/runtime/src/permission_enforcer.rs`, `rust/crates/tools/src/lib.rs`（`+357`） |
 
-## Lane 細節
+## Lane 細節與目前觀察
 
 ### Lane 1 — Bash validation
 
@@ -168,7 +177,7 @@ Canonical scenario map：`rust/mock_parity_scenarios.json`
 - [x] Plugin install/enable/disable/uninstall flow — `rust/crates/commands/src/lib.rs` 中的 `/plugin` slash handling 會委派到 `rust/crates/plugins/src/lib.rs` 的 `PluginManager::{install, enable, disable, uninstall}`。
 - [x] 沒有 `#[ignore]` tests 把 failures 藏起來 — 對 `rust/**/*.rs` 做 `grep` 後，找到 0 個 ignored tests。
 
-## 仍待完成
+## 仍待完成的實驗缺口
 
 - [ ] 超越目前 registry bridge 的 end-to-end MCP runtime lifecycle
 - [x] Output truncation（large stdout/file content）
