@@ -1,21 +1,31 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides repository context and working conventions for agents operating on this codebase.
 
-## Detected stack
+## Repository context
+
 - Languages: Rust.
-- Frameworks: none detected from the supported starter markers.
+- Frameworks: none detected from supported starter markers.
 
 ## Verification
+
 - Run Rust verification from `rust/`: `cargo fmt`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`
 - `src/` and `tests/` are both present; update both surfaces together when behavior changes.
 
-## Repository shape
-- `rust/` contains the Rust workspace and active CLI/runtime implementation.
-- `src/` contains source files that should stay consistent with generated guidance and tests.
-- `tests/` contains validation surfaces that should be reviewed alongside code changes.
+**Rationale**: requiring `clippy` with `-D warnings` and coordinated `src/`+`tests/` updates enforces that behavioral changes are reflected at the verification surface before commit.
 
-## Working agreement
-- Prefer small, reviewable changes and keep generated bootstrap files aligned with actual repo workflows.
-- Keep shared defaults in `.claude.json`; reserve `.claude/settings.local.json` for machine-local overrides.
-- Do not overwrite existing `CLAUDE.md` content automatically; update it intentionally when repo workflows change.
+## Repository shape
+
+| Path | Role |
+|------|------|
+| `rust/` | Rust workspace and active CLI/runtime implementation |
+| `src/` | Source files that should stay consistent with generated guidance and tests |
+| `tests/` | Validation surfaces reviewed alongside code changes |
+
+## Working conventions
+
+| Convention | Rationale |
+|------------|-----------|
+| Prefer small, reviewable changes | Keeps generated bootstrap files aligned with actual repo workflows and makes diffs auditable |
+| Keep shared defaults in `.claude.json` | Separates machine-local state (`.claude/settings.local.json`) from shared project defaults |
+| Do not overwrite existing `CLAUDE.md` content automatically | Updates are intentional when repo workflows change, not incidental side effects of agent runs |

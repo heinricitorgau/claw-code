@@ -1,11 +1,5 @@
 # Rust usage guide
 
-The canonical task-oriented usage guide lives at [`../USAGE.md`](../USAGE.md).
+The canonical task-oriented usage guide is at [`../USAGE.md`](../USAGE.md).
 
-Use that guide for:
-
-- workspace build and test commands
-- authentication setup
-- interactive and one-shot `claw` examples
-- session resume workflows
-- mock parity harness commands
+Use that guide for workspace build and test commands, authentication setup, interactive and one-shot `claw` examples, session resume workflows, and mock parity harness commands.

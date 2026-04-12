@@ -1,23 +1,18 @@
-# Container-first claw-code workflows
+# Container workflows — claw-code
 
-This repo already had **container detection** in the Rust runtime before this document was added:
+## Context
 
-- `rust/crates/runtime/src/sandbox.rs` detects Docker/Podman/container markers such as `/.dockerenv`, `/run/.containerenv`, matching env vars, and `/proc/1/cgroup` hints.
-- `rust/crates/rusty-claude-cli/src/main.rs` exposes that state through the `claw sandbox` / `cargo run -p rusty-claude-cli -- sandbox` report.
-- `.github/workflows/rust-ci.yml` runs on `ubuntu-latest`, but it does **not** define a Docker or Podman container job.
-- Before this change, the repo did **not** have a checked-in `Dockerfile`, `Containerfile`, or `.devcontainer/` config.
+The Rust runtime already included container detection before this document was added:
 
-This document adds a small checked-in `Containerfile` so Docker and Podman users have one canonical container workflow.
+- `rust/crates/runtime/src/sandbox.rs` detects Docker/Podman/container markers: `/.dockerenv`, `/run/.containerenv`, matching env vars, and `/proc/1/cgroup` hints.
+- `rust/crates/rusty-claude-cli/src/main.rs` exposes that state through `claw sandbox` / `cargo run -p rusty-claude-cli -- sandbox`.
+- `.github/workflows/rust-ci.yml` runs on `ubuntu-latest` without a Docker or Podman container job.
 
-## What the checked-in container image is for
+The root [`../Containerfile`](../Containerfile) adds a canonical container image for Docker and Podman users. It does not copy the repository into the image; the recommended flow is to bind-mount your checkout into `/workspace` so edits stay on the host.
 
-The root [`../Containerfile`](../Containerfile) gives you a reusable Rust build/test shell with the extra packages this workspace commonly needs (`git`, `pkg-config`, `libssl-dev`, certificates).
-
-It does **not** copy the repository into the image. Instead, the recommended flow is to bind-mount your checkout into `/workspace` so edits stay on the host.
+**Rationale for bind-mount approach**: avoids container-owned `target/` artifacts appearing in the host checkout; keeps the image reusable across checkout states without rebuilding.
 
 ## Build the image
-
-From the repository root:
 
 ### Docker
 
@@ -32,8 +27,6 @@ podman build -t claw-code-dev -f Containerfile .
 ```
 
 ## Run `cargo test --workspace` in the container
-
-These commands mount the repo, keep Cargo build artifacts out of the working tree, and run from the Rust workspace at `rust/`.
 
 ### Docker
 
@@ -57,7 +50,7 @@ podman run --rm -it \
   cargo test --workspace
 ```
 
-If you want a fully clean rebuild, add `cargo clean &&` before `cargo test --workspace`.
+For a fully clean rebuild, prepend `cargo clean &&` before `cargo test --workspace`.
 
 ## Open a shell in the container
 
@@ -90,11 +83,9 @@ cargo run -p rusty-claude-cli -- --help
 cargo run -p rusty-claude-cli -- sandbox
 ```
 
-The `sandbox` command is a useful sanity check: inside Docker or Podman it should report `In container true` and list the markers the runtime detected.
+The `sandbox` command is a useful verification check: inside Docker or Podman it should report `In container true` and list the markers the runtime detected.
 
-## Bind-mount this repo and another repo at the same time
-
-If you want to run `claw` against a second checkout while keeping `claw-code` itself mounted read-write:
+## Bind-mount a second repository alongside claw-code
 
 ### Docker
 
@@ -126,7 +117,9 @@ cargo run -p rusty-claude-cli -- prompt "summarize /repo"
 
 ## Notes
 
-- Docker and Podman use the same checked-in `Containerfile`.
-- The `:Z` suffix in the Podman examples is for SELinux relabeling; keep it on Fedora/RHEL-class hosts.
-- Running with `CARGO_TARGET_DIR=/tmp/claw-target` avoids leaving container-owned `target/` artifacts in your bind-mounted checkout.
-- For non-container local development, keep using [`../USAGE.md`](../USAGE.md) and [`../rust/README.md`](../rust/README.md).
+| Concern | Detail |
+|---------|--------|
+| Docker vs Podman | Both use the same checked-in `Containerfile` |
+| `:Z` suffix in Podman examples | Required for SELinux relabeling on Fedora/RHEL-class hosts |
+| `CARGO_TARGET_DIR=/tmp/claw-target` | Avoids leaving container-owned `target/` artifacts in the bind-mounted checkout |
+| Non-container local development | Use [`../USAGE.md`](../USAGE.md) and [`../rust/README.md`](../rust/README.md) |

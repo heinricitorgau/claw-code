@@ -1,10 +1,8 @@
-# 🦞 Claw Code — Rust Implementation
+# Claw Code — Rust Implementation
 
-A high-performance Rust rewrite of the Claw Code CLI agent harness. Built for speed, safety, and native tool execution.
+A Rust rewrite of the Claw Code CLI agent harness. For task-oriented usage with copy/paste examples, see [`../USAGE.md`](../USAGE.md).
 
-For a task-oriented guide with copy/paste examples, see [`../USAGE.md`](../USAGE.md).
-
-## Quick Start
+## Quick start
 
 ```bash
 # Inspect available commands
@@ -26,15 +24,13 @@ cargo run -p rusty-claude-cli -- --output-format json prompt "summarize src/main
 
 ## Configuration
 
-Set your API credentials:
-
 ```bash
 export ANTHROPIC_API_KEY="sk-ant-..."
 # Or use a proxy
 export ANTHROPIC_BASE_URL="https://your-proxy.com"
 ```
 
-Or authenticate via OAuth and let the CLI persist credentials locally:
+OAuth-based auth:
 
 ```bash
 cargo run -p rusty-claude-cli -- login
@@ -42,7 +38,7 @@ cargo run -p rusty-claude-cli -- login
 
 ## Mock parity harness
 
-The workspace now includes a deterministic Anthropic-compatible mock service and a clean-environment CLI harness for end-to-end parity checks.
+The workspace includes a deterministic Anthropic-compatible mock service and a clean-environment CLI harness for end-to-end parity verification.
 
 ```bash
 cd rust/
@@ -50,72 +46,70 @@ cd rust/
 # Run the scripted clean-environment harness
 ./scripts/run_mock_parity_harness.sh
 
-# Or start the mock service manually for ad hoc CLI runs
+# Start the mock service manually for ad hoc CLI runs
 cargo run -p mock-anthropic-service -- --bind 127.0.0.1:0
 ```
 
-Harness coverage:
+**Harness coverage**
 
-- `streaming_text`
-- `read_file_roundtrip`
-- `grep_chunk_assembly`
-- `write_file_allowed`
-- `write_file_denied`
-- `multi_tool_turn_roundtrip`
-- `bash_stdout_roundtrip`
-- `bash_permission_prompt_approved`
-- `bash_permission_prompt_denied`
-- `plugin_tool_roundtrip`
+| Scenario | Verification target |
+|----------|---------------------|
+| `streaming_text` | SSE streaming response handling |
+| `read_file_roundtrip` | Read path execution + synthesis |
+| `grep_chunk_assembly` | Chunked grep output handling |
+| `write_file_allowed` | Write success path |
+| `write_file_denied` | Permission denial path |
+| `multi_tool_turn_roundtrip` | Multi-tool assistant turns |
+| `bash_stdout_roundtrip` | Bash execution flow |
+| `bash_permission_prompt_approved` | Permission prompt — approved |
+| `bash_permission_prompt_denied` | Permission prompt — denied |
+| `plugin_tool_roundtrip` | Plugin tool execution path |
 
 Primary artifacts:
 
 - `crates/mock-anthropic-service/` — reusable mock Anthropic-compatible service
 - `crates/rusty-claude-cli/tests/mock_parity_harness.rs` — clean-env CLI harness
 - `scripts/run_mock_parity_harness.sh` — reproducible wrapper
-- `scripts/run_mock_parity_diff.py` — scenario checklist + PARITY mapping runner
+- `scripts/run_mock_parity_diff.py` — scenario checklist and PARITY mapping runner
 - `mock_parity_scenarios.json` — scenario-to-PARITY manifest
 
-## Features
+## Feature status
 
 | Feature | Status |
 |---------|--------|
-| Anthropic / OpenAI-compatible provider flows + streaming | ✅ |
-| OAuth login/logout | ✅ |
-| Interactive REPL (rustyline) | ✅ |
-| Tool system (bash, read, write, edit, grep, glob) | ✅ |
-| Web tools (search, fetch) | ✅ |
-| Sub-agent / agent surfaces | ✅ |
-| Todo tracking | ✅ |
-| Notebook editing | ✅ |
-| CLAUDE.md / project memory | ✅ |
-| Config file hierarchy (`.claw.json` + merged config sections) | ✅ |
-| Permission system | ✅ |
-| MCP server lifecycle + inspection | ✅ |
-| Session persistence + resume | ✅ |
-| Cost / usage / stats surfaces | ✅ |
-| Git integration | ✅ |
-| Markdown terminal rendering (ANSI) | ✅ |
-| Model aliases (opus/sonnet/haiku) | ✅ |
-| Direct CLI subcommands (`status`, `sandbox`, `agents`, `mcp`, `skills`, `doctor`) | ✅ |
-| Slash commands (including `/skills`, `/agents`, `/mcp`, `/doctor`, `/plugin`, `/subagent`) | ✅ |
-| Hooks (`/hooks`, config-backed lifecycle hooks) | ✅ |
-| Plugin management surfaces | ✅ |
-| Skills inventory / install surfaces | ✅ |
-| Machine-readable JSON output across core CLI surfaces | ✅ |
+| Anthropic / OpenAI-compatible provider flows + streaming | complete |
+| OAuth login/logout | complete |
+| Interactive REPL (rustyline) | complete |
+| Tool system (bash, read, write, edit, grep, glob) | complete |
+| Web tools (search, fetch) | complete |
+| Sub-agent / agent surfaces | complete |
+| Todo tracking | complete |
+| Notebook editing | complete |
+| CLAUDE.md / project memory | complete |
+| Config file hierarchy (`.claw.json` + merged config sections) | complete |
+| Permission system | complete |
+| MCP server lifecycle + inspection | complete |
+| Session persistence + resume | complete |
+| Cost / usage / stats surfaces | complete |
+| Git integration | complete |
+| Markdown terminal rendering (ANSI) | complete |
+| Model aliases (opus/sonnet/haiku) | complete |
+| Direct CLI subcommands (`status`, `sandbox`, `agents`, `mcp`, `skills`, `doctor`) | complete |
+| Slash commands (including `/skills`, `/agents`, `/mcp`, `/doctor`, `/plugin`, `/subagent`) | complete |
+| Hooks (`/hooks`, config-backed lifecycle hooks) | complete |
+| Plugin management surfaces | complete |
+| Skills inventory / install surfaces | complete |
+| Machine-readable JSON output across core CLI surfaces | complete |
 
-## Model Aliases
+## Model aliases
 
-Short names resolve to the latest model versions:
-
-| Alias | Resolves To |
-|-------|------------|
+| Alias | Resolves to |
+|-------|-------------|
 | `opus` | `claude-opus-4-6` |
 | `sonnet` | `claude-sonnet-4-6` |
 | `haiku` | `claude-haiku-4-5-20251213` |
 
-## CLI Flags and Commands
-
-Representative current surface:
+## CLI flags and commands
 
 ```text
 claw [OPTIONS] [COMMAND]
@@ -146,35 +140,23 @@ Top-level commands:
   init
 ```
 
-The command surface is moving quickly. For the canonical live help text, run:
+For the canonical live help text: `cargo run -p rusty-claude-cli -- --help`
 
-```bash
-cargo run -p rusty-claude-cli -- --help
-```
-
-## Slash Commands (REPL)
+## Slash commands (REPL)
 
 Tab completion expands slash commands, model aliases, permission modes, and recent session IDs.
 
-The REPL now exposes a much broader surface than the original minimal shell:
+- Session / visibility: `/help`, `/status`, `/sandbox`, `/cost`, `/resume`, `/session`, `/version`, `/usage`, `/stats`
+- Workspace / git: `/compact`, `/clear`, `/config`, `/memory`, `/init`, `/diff`, `/commit`, `/pr`, `/issue`, `/export`, `/hooks`, `/files`, `/branch`, `/release-notes`, `/add-dir`
+- Discovery / debugging: `/mcp`, `/agents`, `/skills`, `/doctor`, `/tasks`, `/context`, `/desktop`, `/ide`
+- Automation / analysis: `/review`, `/advisor`, `/insights`, `/security-review`, `/subagent`, `/team`, `/telemetry`, `/providers`, `/cron`, and more
+- Plugin management: `/plugin` (with aliases `/plugins`, `/marketplace`)
 
-- session / visibility: `/help`, `/status`, `/sandbox`, `/cost`, `/resume`, `/session`, `/version`, `/usage`, `/stats`
-- workspace / git: `/compact`, `/clear`, `/config`, `/memory`, `/init`, `/diff`, `/commit`, `/pr`, `/issue`, `/export`, `/hooks`, `/files`, `/branch`, `/release-notes`, `/add-dir`
-- discovery / debugging: `/mcp`, `/agents`, `/skills`, `/doctor`, `/tasks`, `/context`, `/desktop`, `/ide`
-- automation / analysis: `/review`, `/advisor`, `/insights`, `/security-review`, `/subagent`, `/team`, `/telemetry`, `/providers`, `/cron`, and more
-- plugin management: `/plugin` (with aliases `/plugins`, `/marketplace`)
+Notable slash commands: `/skills [list|install <path>|help]`, `/agents [list|help]`, `/mcp [list|show <server>|help]`, `/doctor`, `/plugin [list|install <path>|enable <name>|disable <name>|uninstall <id>|update <id>]`, `/subagent [list|steer <target> <msg>|kill <id>]`.
 
-Notable claw-first surfaces now available directly in slash form:
-- `/skills [list|install <path>|help]`
-- `/agents [list|help]`
-- `/mcp [list|show <server>|help]`
-- `/doctor`
-- `/plugin [list|install <path>|enable <name>|disable <name>|uninstall <id>|update <id>]`
-- `/subagent [list|steer <target> <msg>|kill <id>]`
+See [`../USAGE.md`](../USAGE.md) for usage examples.
 
-See [`../USAGE.md`](../USAGE.md) for usage examples and run `cargo run -p rusty-claude-cli -- --help` for the live canonical command list.
-
-## Workspace Layout
+## Workspace layout
 
 ```text
 rust/
@@ -192,25 +174,27 @@ rust/
     └── tools/              # Built-in tools, skill resolution, tool search, agent runtime surfaces
 ```
 
-### Crate Responsibilities
+| Crate | Responsibilities |
+|-------|-----------------|
+| `api` | Provider clients, SSE streaming, request/response types, auth (API key + OAuth bearer), request-size/context-window preflight |
+| `commands` | Slash command definitions, parsing, help text generation, JSON/text command rendering |
+| `compat-harness` | Extracts tool/prompt manifests from upstream TS source |
+| `mock-anthropic-service` | Deterministic `/v1/messages` mock for CLI parity tests and local harness runs |
+| `plugins` | Plugin metadata, install/enable/disable/update flows, plugin tool definitions, hook integration surfaces |
+| `runtime` | `ConversationRuntime`, config loading, session persistence, permission policy, MCP client lifecycle, system prompt assembly, usage tracking |
+| `rusty-claude-cli` | REPL, one-shot prompt, direct CLI subcommands, streaming display, tool call rendering, CLI argument parsing |
+| `telemetry` | Session trace events and supporting telemetry payloads |
+| `tools` | Tool specs + execution: Bash, ReadFile, WriteFile, EditFile, GlobSearch, GrepSearch, WebSearch, WebFetch, Agent, TodoWrite, NotebookEdit, Skill, ToolSearch, and runtime-facing tool discovery |
 
-- **api** — provider clients, SSE streaming, request/response types, auth (API key + OAuth bearer), request-size/context-window preflight
-- **commands** — slash command definitions, parsing, help text generation, JSON/text command rendering
-- **compat-harness** — extracts tool/prompt manifests from upstream TS source
-- **mock-anthropic-service** — deterministic `/v1/messages` mock for CLI parity tests and local harness runs
-- **plugins** — plugin metadata, install/enable/disable/update flows, plugin tool definitions, hook integration surfaces
-- **runtime** — `ConversationRuntime`, config loading, session persistence, permission policy, MCP client lifecycle, system prompt assembly, usage tracking
-- **rusty-claude-cli** — REPL, one-shot prompt, direct CLI subcommands, streaming display, tool call rendering, CLI argument parsing
-- **telemetry** — session trace events and supporting telemetry payloads
-- **tools** — tool specs + execution: Bash, ReadFile, WriteFile, EditFile, GlobSearch, GrepSearch, WebSearch, WebFetch, Agent, TodoWrite, NotebookEdit, Skill, ToolSearch, and runtime-facing tool discovery
+## Repository stats
 
-## Stats
-
-- **~20K lines** of Rust
-- **9 crates** in workspace
-- **Binary name:** `claw`
-- **Default model:** `claude-opus-4-6`
-- **Default permissions:** `danger-full-access`
+| Metric | Value |
+|--------|-------|
+| Rust LOC | ~20K lines |
+| Crates | 9 |
+| Binary name | `claw` |
+| Default model | `claude-opus-4-6` |
+| Default permissions | `danger-full-access` |
 
 ## License
 
